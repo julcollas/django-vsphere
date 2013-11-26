@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-ng-app="esxiApp">
+<head>
+    <meta charset="utf-8">
+    <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="//code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
+
+    <link href="//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.min.css" rel="stylesheet"/>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 100px;
+            font-size: 12px;
+        }
+
+        .progress {
+            margin-bottom: 0px;
+        }
+
+        .ui-autocomplete {
+            z-index: 1031;
+        }
+
+        .navbar-inverse .navbar-brand {
+            color: white;
+        }
+
+        a:hover {
+            text-decoration: none;
+        }
+
+        a {
+            color: black;
+        }
+
+        .pagination>.active>a,
+        .pagination>.active>span,
+        .pagination>.active>a:hover,
+        .pagination>.active>span:hover,
+        .pagination>.active>a:focus,
+        .pagination>.active>span:focus {
+            background-color: black;
+            border-color: black;
+        }
+    </style>
+
+    <script>
+        $(function () {
+            $('#search').autocomplete({
+                source: function (requete, reponse) {
+                    $.ajax({
+                        url: '/api/guest',
+                        dataType: 'json',
+                        data: {
+                            name__icontains: $('#search').val(),
+                            limit: 15
+                        },
+                        success: function (donnee) {
+                            reponse($.map(donnee.objects, function (objet) {
+                                return objet.name;
+                            }));
+                        }
+                    });
+                },
+                select: function (event, ui) {
+                    window.location = "/guest/?name=" + ui.item.value;
+                }
+            });
+        });
+        $(function () {
+            $('a').popover({placement: 'auto', trigger: 'hover', 'html': true});
+        });
+    </script>
+</head>
+
+<body>
+<header class="navbar navbar-inverse navbar-fixed-top">
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-10">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" onclick="document.location = '/';"><strong>vSphere</strong></a>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="#" onclick="document.location = '/hypervisors';">Hypervisors</a></li>
+                    <li><a href="#" onclick="document.location = '/guests';">Guests</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Statistics <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" onclick="document.location = '/top10';">Top 10</a></li>
+                            <li><a href="#" onclick="document.location = '/resourcepool';">Resource Pool</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <form name="search" class="navbar-form navbar-right" role="search"
+                      onsubmit="window.location.href = '/search/?filter=' + document.forms['search']['search'].value; return false">
+                    <div class="form-group">
+                        <input id="search" label="search" type="text" class="form-control" placeholder="Search"/>
+                    </div>
+                </form>
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</header>
+
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        {% block content %}{% endblock %}
+    </div>
+    <div class="col-md-1"></div>
+</div>
+</body>
+</html>

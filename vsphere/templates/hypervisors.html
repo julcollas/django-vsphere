@@ -1,0 +1,35 @@
+{% extends "head.html" %}
+{% load i18n %}
+
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>{{ hypervisor_list | length }} Hypervisors</strong></div>
+        {% include "hypervisor_list.html" %}
+    </div>
+
+    {% if hypervisor_list.has_other_pages %}
+        <ul class="pagination pagination-sm">
+            {% if hypervisor_list.has_previous %}
+                <li><a href="?page={{ hypervisor_list.previous_page_number }}{{ getvars }}{{ hashtag }}" class="prev">&lsaquo;&lsaquo; previous</a></li>
+            {% else %}
+                <li class="disabled prev"><a href="#">&lsaquo;&lsaquo; previous</a></li>
+            {% endif %}
+            {% for page in hypervisor_list.paginator.page_range %}
+                {% if page %}
+                    {% ifequal page hypervisor_list.number %}
+                        <li class="current page active"><a href="#">{{ page }}</a></li>
+                    {% else %}
+                        <li><a href="?page={{ page }}{{ getvars }}{{ hashtag }}" class="page">{{ page }}</a></li>
+                    {% endifequal %}
+                {% else %}
+                    ...
+                {% endif %}
+            {% endfor %}
+            {% if hypervisor_list.has_next %}
+                <li><a href="?page={{ hypervisor_list.next_page_number }}{{ getvars }}{{ hashtag }}" class="next">next &rsaquo;&rsaquo;</a></li>
+            {% else %}
+                <li class="disabled next"><a href="#">next &rsaquo;&rsaquo;</a></li>
+            {% endif %}
+        </ul>
+    {% endif %}
+{% endblock %}

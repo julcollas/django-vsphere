@@ -1,0 +1,113 @@
+{% extends "head.html" %}
+{% load multiply %}
+{% load percent %}
+
+{% block content %}
+    <h3>{{ guest.name }}</h3>
+    <div class="row">
+        <div class="col-md-5">
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-barcode"></span><strong>  General</strong></div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">Guest OS</div>
+                        <div class="col-md-8">{{ guest.osVersion }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">vCpu</div>
+                        <div class="col-md-8">{{ guest.vcpu }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">Memory</div>
+                        <div class="col-md-8">{{ guest.memory | multiply:1048576 | filesizeformat }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">Status</div>
+                        <div class="col-md-8">
+                            {% if guest.poweredOn %}
+                                <span class="label label-primary">
+                                <span class="glyphicon glyphicon-play"></span>
+                            </span>
+                            {% else %}
+                                <span class="label label-danger">
+                                <span class="glyphicon glyphicon-stop"></span>
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">Resource Pool</div>
+                        <div class="col-md-8">{{ guest.resourcePool }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">Datacenter</div>
+                        <div class="col-md-8">{{ guest.hypervisor.datacenter }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">Hosted on</div>
+                        <div class="col-md-8"><a href='#' onclick="document.location = '/hypervisor/?name={{ guest.hypervisor.name }}';"><span class="label label-default">{{ guest.hypervisor.name }}</span></a></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">Notes</div>
+                        <div class="col-md-8">{{ guest.annotation }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">Interfaces</div>
+                        <div class="col-md-8">{{ vnics | length }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-hdd"></span><strong>  Storage  -  </strong>{{ disks | length }} Disk(s)</div>
+                <div class="panel-body">
+                    {% for disk in disks %}
+                        <div class="row">
+                            <div class="col-md-2">
+                                <strong>{{ disk.name }}</strong>
+                            </div>
+                            <div class="col-md-4">{{ disk.datastore.info.vmfs.ssd|yesno:"SSD, Non-SSD" }}</div>
+                            <div class="col-md-4">{{ disk.size | multiply:1048576 | filesizeformat }}</div>
+                            <div class="col-md-2">
+                                <a href="#" class="label label-info" rel="popover"
+                                   data-content="{% for g in disk.datastore.get_guests %}<p>{{ g.name }}</p>{% endfor %}">{{ disk.datastore.name }}</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-link"></span><strong>  Network  -  </strong>{{ vnics | length }} Network(s)</div>
+                <div class="panel-body">
+                    {% for vnic in vnics %}
+                        <div class="col-md-3">
+                            <table class="table table-condensed">
+                                <tr>
+                                    <td>Network</td>
+                                    <td>{{ vnic.network.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Interface</td>
+                                    <td>{{ vnic.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td>MAC</td>
+                                    <td>{{ vnic.mac }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Driver</td>
+                                    <td>{{ vnic.driver }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Vlan ID</td>
+                                    <td>{{ vnic.network.vlanId }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

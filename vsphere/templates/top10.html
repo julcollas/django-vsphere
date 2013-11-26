@@ -1,0 +1,173 @@
+{% extends "head.html" %}
+
+{% block content %}
+    <script src="//code.highcharts.com/highcharts.js"></script>
+    <script src="//code.highcharts.com/modules/exporting.js"></script>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div id="MemoryPieChart"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div id="DiskPieChart"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div id="VcpuPieChart"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        function round_number(num, dec) {
+            return Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
+        }
+
+        function humanize_filesize(fs) {
+            if (fs >= 1099511627776) {
+                return round_number(fs / 1099511627776, 2) + ' TB';
+            }
+            if (fs >= 1073741824) {
+                return round_number(fs / 1073741824, 2) + ' GB';
+            }
+            if (fs >= 1048576) {
+                return round_number(fs / 1048576, 2) + ' MB';
+            }
+            if (fs >= 1024) {
+                return round_number(fs / 1024, 0) + ' KB';
+            }
+            return fs + ' B';
+        }
+
+        $(function () {
+            var chart;
+            $(document).ready(function () {
+                chart = new Highcharts.Chart({
+                    credits: {
+                        enabled: false
+                    },
+                    chart: {
+                        renderTo: 'MemoryPieChart'
+                    }, title: {
+                        text: 'Memory'
+                    }, tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.point.name + '</b>: ' + humanize_filesize(this.y * 1048576);
+                        }
+                    }, exporting: {
+                        enabled: false
+                    }, plotOptions: {
+                        pie: {
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return '<b>' + this.point.name + '</b>: ' + Math.round(this.percentage) + ' %';
+                                }
+                            }
+                        }
+                    }, series: [
+                        {
+                            type: 'pie',
+                            data: [
+                                {% for rp in resource_pool %}
+                                    {% if rp.name in top10_mem %}
+                                        [ '{{ rp.name}}', {{ rp.mem_reserved }} ],
+                                    {% endif %}
+                                {% endfor %}
+                            ]
+                        }
+                    ]
+                });
+            });
+        });
+
+
+        $(function () {
+            var chart;
+            $(document).ready(function () {
+                chart = new Highcharts.Chart({
+                    credits: {
+                        enabled: false
+                    },
+                    chart: {
+                        renderTo: 'DiskPieChart'
+                    }, title: {
+                        text: 'Storage'
+                    }, tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.point.name + '</b>: ' + humanize_filesize(this.y * 1048576);
+                        }
+                    }, exporting: {
+                        enabled: false
+                    }, plotOptions: {
+                        pie: {
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return '<b>' + this.point.name + '</b>: ' + Math.round(this.percentage) + ' %';
+                                }
+                            }
+                        }
+                    }, series: [
+                        {
+                            type: 'pie',
+                            data: [
+                                {% for rp in resource_pool %}
+                                    {% if rp.name in top10_disk %}
+                                        [ '{{ rp.name}}', {{ rp.disk_reserved }} ],
+                                    {% endif %}
+                                {% endfor %}
+                            ]
+                        }
+                    ]
+                });
+            });
+        });
+
+        $(function () {
+            var chart;
+            $(document).ready(function () {
+                chart = new Highcharts.Chart({
+                    credits: {
+                        enabled: false
+                    },
+                    chart: {
+                        renderTo: 'VcpuPieChart'
+                    }, title: {
+                        text: 'Cpu'
+                    }, tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.point.name + '</b>: ' + this.y.toFixed(2);
+                        }
+                    }, exporting: {
+                        enabled: false
+                    }, plotOptions: {
+                        pie: {
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return '<b>' + this.point.name + '</b>: ' + Math.round(this.percentage) + ' %';
+                                }
+                            }
+                        }
+                    }, series: [
+                        {
+                            type: 'pie',
+                            data: [
+                                {% for rp in resource_pool %}
+                                    {% if rp.name in top10_cpu %}
+                                        [ '{{ rp.name}}', {{ rp.vcpu_reserved }} ],
+                                    {% endif %}
+                                {% endfor %}
+                            ]
+                        }
+                    ]
+                });
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% load multiply %}
+{% load percent %}
+
+{% block content %}
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Hostname</th>
+                <th>Resource Pool</th>
+                <th>Memory</th>
+                <th>Disk</th>
+                <th>vCPU</th>
+                <th>Status</th>
+                <th>Hypervisor</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for guest in guest_list %}
+        <tr>
+            <td onclick="document.location = '/guest/?name={{ guest.name }}';">{{ guest.name }}</td>
+            <td onclick="document.location = '/guest/?name={{ guest.name }}';">{{ guest.resourcePool }}</td>
+            <td onclick="document.location = '/guest/?name={{ guest.name }}';">{{ guest.memory | multiply:1048576 | filesizeformat }}</td>
+            <td onclick="document.location = '/guest/?name={{ guest.name }}';">{{ guest.get_disk_reserved | multiply:1048576 | filesizeformat }}</td>
+            <td onclick="document.location = '/guest/?name={{ guest.name }}';">{{ guest.vcpu }}</td>
+            <td onclick="document.location = '/guest/?name={{ guest.name }}';">
+                {% if guest.poweredOn %}
+                    <span class="label label-primary">
+                        <span class="glyphicon glyphicon-play"></span>
+                    </span>
+                {% else %}
+                    <span class="label label-danger">
+                        <span class="glyphicon glyphicon-stop"></span>
+                    </span>
+                {% endif %}
+            </td>
+            <td onclick="document.location = '/hypervisor/?name={{ guest.get_hypervisor_name }}';">{{ guest.get_hypervisor_name }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

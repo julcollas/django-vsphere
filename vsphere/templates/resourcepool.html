@@ -1,0 +1,32 @@
+{% extends "head.html" %}
+{% load multiply %}
+
+{% block content %}
+    <div class="row">
+        {% for rp in resource_pool|dictsort:"mem_reserved" %}
+            <div class="col-md-3">
+                <div class="well">
+                    <h2>{{ rp.name }}</h2>
+                    <table class="table table-condensed">
+                        <tr>
+                            <td>Guests</td>
+                            <td>{{ rp.num_vm }}</td>
+                        </tr>
+                        <tr>
+                            <td>Memory</td>
+                            <td>{{ rp.mem_reserved | multiply:1048576 | filesizeformat }}</td>
+                        </tr>
+                        <tr>
+                            <td>CPU</td>
+                            <td>{{ rp.vcpu_reserved }}</td>
+                        </tr>
+                        <tr>
+                            <td>Disk</td>
+                            <td>{{ rp.disk_reserved| multiply:1048576 | filesizeformat }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

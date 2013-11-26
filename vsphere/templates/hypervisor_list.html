@@ -1,0 +1,48 @@
+{% load multiply %}
+{% load percent %}
+
+{% block content %}
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Hostname</th>
+            <th>Hosted Guest</th>
+            <th>Reserved Memory</th>
+            <th>Allocated Disk</th>
+            <th>CPU Threads</th>
+            <th>Allocated vCpu</th>
+            <th>Datacenter</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for hv in hypervisor_list %}
+            <tr onclick="document.location = '/hypervisor/?name={{ hv.name }}';">
+                <td>{{ hv.name }}</td>
+                <td>{{ hv.get_number_guest }}</td>
+                <td>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar"
+                             aria-valuenow="{{ hv.memoryReserved|percent:hv.memorySize }}" aria-valuemin="0"
+                             aria-valuemax="100" style="width: {{ hv.memoryReserved|percent:hv.memorySize }}%;">
+                            <span>{{ hv.memoryReserved|percent:hv.memorySize }}%</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar"
+                             aria-valuenow="{{ hv.diskReserved|percent:hv.get_datastores_size }}" aria-valuemin="0"
+                             aria-valuemax="100"
+                             style="width: {{ hv.diskReserved|percent:hv.get_datastores_size }}%;">
+                            <span>{{ hv.diskReserved|percent:hv.get_datastores_size }}%</span>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ hv.numCpuThreads }}</td>
+                <td>{{ hv.vcpuReserved }}</td>
+                <td>{{ hv.datacenter }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

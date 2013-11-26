@@ -1,0 +1,54 @@
+{% extends "head.html" %}
+{% load multiply %}
+{% load percent %}
+
+{% block content %}
+    <div class="row">
+        {% for dc in datacenter|dictsort:"name" %}
+            <div class="col-md-4">
+                <div class="well">
+                    <a href="#" onclick="document.location = '/search/?filter={{ dc.name }}'">
+                    <h2>{{ dc.name }}</h2></a>
+                    <table class="table table-condensed">
+                        <tr>
+                            <td>Hypervisors</td>
+                            <td>{{ dc.nb_hv }}</td>
+                        </tr>
+                        <tr>
+                            <td>Guests</td>
+                            <td>{{ dc.nb_guest }}</td>
+                        </tr>
+                        <tr>
+                            <td>CPU Consolidation</td>
+                            <td>{{ dc.cpu_consolidation|floatformat:3 }}</td>
+                        </tr>
+                        <tr>
+                            <td>Used Memory</td>
+                            <td>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" aria-valuenow="{{ dc.used_mem }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100" style="width: {{ dc.used_mem }}%;">
+                                        <span>{{ dc.used_mem }} %</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Used Storage</td>
+                            <td>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" aria-valuenow="{{ dc.used_storage }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100" style="width: {{ dc.used_storage }}%;">
+                                        <span>{{ dc.used_storage }} %</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

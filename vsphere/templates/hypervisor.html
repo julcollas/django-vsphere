@@ -1,0 +1,214 @@
+{% extends "head.html" %}
+{% load multiply %}
+{% load percent %}
+
+{% block content %}
+    <h3>
+        {{ hypervisor.name }} {{ hypervisor.productName }}
+    </h3>
+    <div class="row">
+        <div class="col-md-5">
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-barcode"></span><strong>  General</strong></div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4"><strong>Datacenter</strong></div>
+                        <div class="col-md-8">{{ hypervisor.datacenter }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"><strong>Manufacturer</strong></div>
+                        <div class="col-md-8">{{ hypervisor.vendor }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"><strong>Model</strong></div>
+                        <div class="col-md-8">{{ hypervisor.model }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"><strong>CPU Cores</strong></div>
+                        <div class="col-md-8">{{ hypervisor.numCpuCores }} CPUs x {{ hypervisor.cpuMhz }} MHz</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"><strong>Processor Type</strong></div>
+                        <div class="col-md-8">{{ hypervisor.cpuModel }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"><strong>Processor Sockets</strong></div>
+                        <div class="col-md-8">{{ hypervisor.numCpuPkgs }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"><strong>Cores per Socket</strong></div>
+                        <div class="col-md-8">{{ hypervisor.numCpuCores }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"><strong>Logical Processors</strong></div>
+                        <div class="col-md-8">{{ hypervisor.numCpuThreads }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"><strong>Number of NICs</strong></div>
+                        <div class="col-md-8">{{ hypervisor.numNics }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"><strong>Number of HBAs</strong></div>
+                        <div class="col-md-8">{{ hypervisor.numHBAs }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-eye-open"></span><strong>  Resources</strong></div>
+                <div class="panel-body">
+                    <div>
+                            Memory: <strong>{{ hypervisor.memoryReserved | multiply:1048576 | filesizeformat }}</strong>
+                            / {{ hypervisor.memorySize | multiply:1048576 | filesizeformat }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="progress">
+                                <div class="progress-bar"
+                                     role="progressbar"
+                                     aria-valuenow="{{ hypervisor.memoryReserved|percent:hypervisor.memorySize }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100"
+                                     style="width: {{ hypervisor.memoryReserved|percent:hypervisor.memorySize }}%;"
+                                        ><span>{{ hypervisor.memoryReserved|percent:hypervisor.memorySize }}%</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    </br>
+                    <div>
+                            Datastores: <strong>{{ hypervisor.diskReserved | multiply:1048576 | filesizeformat }}</strong>
+                            / {{ hypervisor.get_datastores_size | multiply:1048576 | filesizeformat }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="progress">
+                                <div class="progress-bar"
+                                     role="progressbar"
+                                     aria-valuenow="{{ hypervisor.diskReserved|percent:hypervisor.get_datastores_size }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100"
+                                     style="width: {{ hypervisor.diskReserved|percent:hypervisor.get_datastores_size }}%;"
+                                        ><span>{{ hypervisor.diskReserved|percent:hypervisor.get_datastores_size }}%</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><span class="glyphicon glyphicon-hdd"></span><strong>  Storage  -  </strong>{{ datastores | length }} Datastore(s)</div>
+        <div class="panel-body">
+            {% for ds in datastores %}
+                <div class="row">
+                    <div class="col-md-2">
+                        <strong>{{ ds.name }}</strong>
+                    </div>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2">{{ ds.capacity | multiply:1048576 | filesizeformat }} Total</div>
+                    <div class="col-md-2">{{ ds.get_reserved | multiply:1048576 | filesizeformat }} Used
+                    </div>
+                    <div class="col-md-2">
+                        <a href="#" class="label label-info" rel="popover"
+                           data-content="{% for g in ds.get_guests %}<p>{{ g.name }}</p>{% endfor %}">{{ ds.get_guests | length }}
+                            VMs</a>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="progress">
+                            <div class="progress-bar"
+                                 role="progressbar"
+                                 aria-valuenow="{{ ds.get_reserved|percent:ds.capacity }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
+                                 style="width: {{ ds.get_reserved|percent:ds.capacity }}%;"
+                                    ><span>{{ ds.get_reserved|percent:ds.capacity }}%</span></div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><span class="glyphicon glyphicon-link"></span><strong>  Network  -  </strong>{{ networks | length }} Network(s)</div>
+        <div class="panel-body">
+            {% for int in interfaces %}
+                <div class="row">
+                    <div class="col-md-2"><strong><a href="#" class="label label-info" rel="popover" data-content="<table class='table table-condensed'><tr><td>driver</td><td>{{ int.driver }}</td></tr><tr><td>speed</td><td>{{ int.linkSpeed }}</td></tr><tr><td>mac</td><td>{{ int.mac }}</td></tr></table>">{{ int.name }}</a></strong></div>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-8">
+                        <div>
+                        {% for vs in vswitchs %}
+                        {% if int.vswitch.name == vs.name %}
+                            <div class="row">
+                                <div class="col-md-2">{{ vs.name }}</div>
+                                <div class="col-md-8">
+                                    <div>
+                                    {% for net in networks %}
+                                    {% if net.vswitch.name == vs.name %}
+                                        <div class="row">
+                                            <div class="col-md-3">{{ net.name }}</div>
+                                            <div class="col-md-3">
+                                            {% if net.vlanId %}
+                                                vlan: {{ net.vlanId }}
+                                            {% endif %}
+                                            </div>
+                                            <div class="col-md-1"></div>
+                                            <div class="col-md-2">
+                                                <a href="#" class="label label-info" rel="popover" data-content="{% for g in net.get_virtualnics %}<p>{{ g.guest.name }}</p>{% endfor %}">{{ net.get_virtualnics | length }} VMs</a>
+                                            </div>
+                                        </div>
+                                     {% endif %}
+                                     {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><span class="glyphicon glyphicon-cloud"></span><strong>  Guest  -  </strong>{{ hypervisor.get_number_guest }} vm(s)</div>
+        <table class="table table-striped table-hover">
+            <thead>
+            <tr>
+                <th>Hostname</th>
+                <th>Status</th>
+                <th>Resource Pool</th>
+                <th>Memory</th>
+                <th>Disk</th>
+                <th>vCPU</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for guest in guests %}
+                <tr onclick="document.location = '/guest/?name={{ guest.name }}';">
+                    <td>{{ guest.name }}</td>
+                    <td>
+                        {% if guest.poweredOn %}
+                            <span class="label label-primary">
+                        <span class="glyphicon glyphicon-play"></span>
+                    </span>
+                        {% else %}
+                            <span class="label label-danger">
+                        <span class="glyphicon glyphicon-stop"></span>
+                    </span>
+                        {% endif %}
+                    </td>
+                    <td>{{ guest.resourcePool }}</td>
+                    <td>{{ guest.memory | multiply:1048576 | filesizeformat }}</td>
+                    <td>{{ guest.get_disk_reserved | multiply:1048576 | filesizeformat }}</td>
+                    <td>{{ guest.vcpu }}</td>
+
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}
