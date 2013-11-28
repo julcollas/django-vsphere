@@ -20,10 +20,13 @@ Quick start
 
       url(r'^', include('vsphere.urls')),
 
-4. Run `python manage.py syncdb` to create the vsphere models.
+4. Run syncdb to create the vsphere models::
 
-5. Start the development server and visit http://127.0.0.1:8000/admin/
-  to start with vsphere (you'll need the Admin app enabled).
+      python manage.py syncdb
+
+5. Start the development server and visit http://127.0.0.1:8000/admin/ ::
+
+      python manage.py runserver
 
 6. Visit http://127.0.0.1:8000/ to display the dashboard.
 
