@@ -79,12 +79,17 @@ class Guest(models.Model):
     def get_hypervisor_name(self):
         return self.hypervisor.name
 
-    def get_disk_reserved(self):
-        disk_list = Disk.objects.filter(guest=self)
+    def get_disk_reserved(self, raw=''):
+        if raw is False:
+            disk_list = Disk.objects.filter(guest=self, raw=False)
+        else:
+            disk_list = Disk.objects.filter(guest=self)
         disk_reserved = 0
         for disk in disk_list:
             disk_reserved += int(disk.size)
         return disk_reserved
+
+
 
 
 class Datastore(models.Model):

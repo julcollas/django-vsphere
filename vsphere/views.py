@@ -64,7 +64,7 @@ def resourcepool_info(request):
         for guest in guests:
             mem_reserved += guest.memory
             vcpu_reserved += guest.vcpu
-            disk_reserved += guest.get_disk_reserved()
+            disk_reserved += guest.get_disk_reserved(raw=False)
         info = {'name': rp,
                 'num_vm': num_vm,
                 'mem_reserved': mem_reserved,
