@@ -6,24 +6,23 @@ name_regex = re.compile(r'^[a-zA-Z0-9\-\_\.]+$')
 
 
 class Hypervisor(models.Model):
-    name = models.CharField(max_length=20, unique=True,
+    name = models.CharField(max_length=100, unique=True,
                             validators=[RegexValidator(regex=name_regex)])
-    cpuModel = models.CharField(max_length=20)
+    cpuModel = models.CharField(max_length=100, blank=True, null=True)
     numCpuPkgs = models.IntegerField()
-    vendor = models.CharField(max_length=20)
-    model = models.CharField(max_length=20)
+    vendor = models.CharField(max_length=100, blank=True, null=True)
+    model = models.CharField(max_length=100, blank=True, null=True)
     numCpuThreads = models.IntegerField()
     memorySize = models.IntegerField()
     numCpuCores = models.IntegerField()
     cpuMhz = models.IntegerField()
     numHBAs = models.IntegerField()
     numNics = models.IntegerField()
-    productName = models.CharField(max_length=100)
-
-    datacenter = models.CharField(
-        max_length=20,
-        unique=False,
-        validators=[RegexValidator(regex=name_regex)])
+    productName = models.CharField(max_length=100, blank=True, null=True)
+    productVersion = models.CharField(max_length=20, blank=True, null=True)
+    annotation = models.CharField(max_length=100, blank=True, null=True)
+    datacenter = models.CharField(max_length=100, unique=False,
+                                  validators=[RegexValidator(regex=name_regex)])
 
     def __unicode__(self):
         return u'%s' % self.name
@@ -65,13 +64,13 @@ class Hypervisor(models.Model):
 
 
 class Guest(models.Model):
-    name = models.CharField(max_length=20, unique=True)
+    name = models.CharField(max_length=100, unique=True)
     poweredOn = models.BooleanField()
     vcpu = models.IntegerField()
     memory = models.IntegerField()
-    resourcePool = models.CharField(max_length=20)
-    annotation = models.CharField(max_length=100)
-    osVersion = models.CharField(max_length=20)
+    resourcePool = models.CharField(max_length=100)
+    annotation = models.CharField(max_length=100, blank=True, null=True)
+    osVersion = models.CharField(max_length=100, blank=True, null=True)
     hypervisor = models.ForeignKey(Hypervisor, unique=False, null=False)
 
     def __unicode__(self):
@@ -89,7 +88,7 @@ class Guest(models.Model):
 
 
 class Datastore(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=100)
     capacity = models.IntegerField()
     hypervisor = models.ForeignKey(Hypervisor, null=False)
 
@@ -100,7 +99,8 @@ class Datastore(models.Model):
         vd_list = Disk.objects.filter(datastore=self)
         reserved = 0
         for vd in vd_list:
-            reserved += int(vd.size)
+            if not vd.raw:
+                reserved += int(vd.size)
         return reserved
 
     def get_guests(self):
@@ -113,17 +113,19 @@ class Datastore(models.Model):
 
 
 class Disk(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=100)
     size = models.IntegerField()
     guest = models.ForeignKey(Guest, null=False)
-    datastore = models.ForeignKey(Datastore, null=False)
+    datastore = models.ForeignKey(Datastore, null=True)
+    raw = models.BooleanField(default=False)
+    thin = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u'%s' % self.name
 
 
 class Vswitch(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=100)
     hypervisor = models.ForeignKey(Hypervisor, unique=False, null=False)
 
     def __unicode__(self):
@@ -131,7 +133,7 @@ class Vswitch(models.Model):
 
 
 class Network(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=100)
     vlanId = models.IntegerField()
     vswitch = models.ForeignKey(Vswitch, unique=False, null=False)
 
@@ -144,9 +146,9 @@ class Network(models.Model):
 
 
 class Interface(models.Model):
-    name = models.CharField(max_length=20)
-    mac = models.CharField(max_length=20)
-    driver = models.CharField(max_length=20)
+    name = models.CharField(max_length=100)
+    mac = models.CharField(max_length=100, blank=True, null=True)
+    driver = models.CharField(max_length=100, blank=True, null=True)
     linkSpeed = models.IntegerField()
     vswitch = models.ForeignKey(Vswitch, unique=False, null=True)
     hypervisor = models.ForeignKey(Hypervisor, unique=False, null=False)
@@ -156,9 +158,9 @@ class Interface(models.Model):
 
 
 class VirtualNic(models.Model):
-    name = models.CharField(max_length=20)
-    mac = models.CharField(max_length=20)
-    driver = models.CharField(max_length=20)
+    name = models.CharField(max_length=100)
+    mac = models.CharField(max_length=100, blank=True, null=True)
+    driver = models.CharField(max_length=100, blank=True, null=True)
     guest = models.ForeignKey(Guest, unique=False, null=False)
     network = models.ForeignKey(Network, unique=False, null=False)
 

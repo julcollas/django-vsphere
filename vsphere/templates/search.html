@@ -1,7 +1,9 @@
 {% extends "head.html" %}
 {% load multiply %}
 {% load percent %}
-
+{% block title %}
+    vSphere - Search
+{% endblock %}
 {% block content %}
     {% if hypervisor_list %}
         <div class="panel panel-default">

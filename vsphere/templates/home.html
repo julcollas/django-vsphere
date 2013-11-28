@@ -1,7 +1,9 @@
 {% extends "head.html" %}
 {% load multiply %}
 {% load percent %}
-
+{% block title %}
+    vSphere - Dashboard
+{% endblock %}
 {% block content %}
     <div class="row">
         {% for dc in datacenter|dictsort:"name" %}

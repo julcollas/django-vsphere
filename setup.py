@@ -16,7 +16,7 @@ setup(
     long_description = README,
     author = 'Julien Collas',
     author_email = 'jul.collas@gmail.com',
-    install_requires=['django-tastypie, python-mimeparse'],
+    install_requires=['django-tastypie', 'python-mimeparse'],
     classifiers = [
         'Environment :: Web Environment',
         'Framework :: Django',

@@ -1,10 +1,12 @@
 {% extends "head.html" %}
 {% load multiply %}
 {% load percent %}
-
+{% block title %}
+    vSphere - {{ hypervisor.name }}
+{% endblock %}
 {% block content %}
     <h3>
-        {{ hypervisor.name }} {{ hypervisor.productName }}
+        {{ hypervisor.name }}
     </h3>
     <div class="row">
         <div class="col-md-5">
@@ -51,6 +53,14 @@
                         <div class="col-md-4"><strong>Number of HBAs</strong></div>
                         <div class="col-md-8">{{ hypervisor.numHBAs }}</div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-4"><strong>Product</strong></div>
+                        <div class="col-md-8">{{ hypervisor.productName }} - {{ hypervisor.productVersion }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"><strong>Notes</strong></div>
+                        <div class="col-md-8">{{ hypervisor.annotation }}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -95,6 +105,21 @@
                     </div>
                 </div>
             </div>
+
+
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-link"></span><strong>  Interfaces  -  </strong>{{ interfaces | length }} Interfaces(s)</div>
+                <div class="panel-body">
+                    <div class="row">
+                        {% for int in interfaces %}
+                            <div class="col-md-3">
+                                <a href="#" class="label label-default" rel="popover" data-content="<table class='table table-condensed'><tr><td>driver</td><td>{{ int.driver }}</td></tr><tr><td>speed</td><td>{{ int.linkSpeed }}</td></tr><tr><td>mac</td><td>{{ int.mac }}</td></tr></table>">{{ int.name }}</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -134,43 +159,35 @@
     <div class="panel panel-default">
         <div class="panel-heading"><span class="glyphicon glyphicon-link"></span><strong>  Network  -  </strong>{{ networks | length }} Network(s)</div>
         <div class="panel-body">
-            {% for int in interfaces %}
-                <div class="row">
-                    <div class="col-md-2"><strong><a href="#" class="label label-info" rel="popover" data-content="<table class='table table-condensed'><tr><td>driver</td><td>{{ int.driver }}</td></tr><tr><td>speed</td><td>{{ int.linkSpeed }}</td></tr><tr><td>mac</td><td>{{ int.mac }}</td></tr></table>">{{ int.name }}</a></strong></div>
-                    <div class="col-md-2"></div>
-                    <div class="col-md-8">
+            <table class="table table-condensed">
+            {% for vs in vswitchs %}
+                <tr>
+                    <td class="col-md-2">
+                    <a href="#" class="label label-info" rel="popover" data-content="{% for int in interfaces %} {% if int.vswitch.name == vs.name %}<p>{{ int.name }}</p>{% endif %}{% endfor %}">{{ vs.name }}</a></td>
+                    <td class="col-md-10">
                         <div>
-                        {% for vs in vswitchs %}
-                        {% if int.vswitch.name == vs.name %}
-                            <div class="row">
-                                <div class="col-md-2">{{ vs.name }}</div>
-                                <div class="col-md-8">
-                                    <div>
-                                    {% for net in networks %}
-                                    {% if net.vswitch.name == vs.name %}
-                                        <div class="row">
-                                            <div class="col-md-3">{{ net.name }}</div>
-                                            <div class="col-md-3">
-                                            {% if net.vlanId %}
-                                                vlan: {{ net.vlanId }}
-                                            {% endif %}
-                                            </div>
-                                            <div class="col-md-1"></div>
-                                            <div class="col-md-2">
-                                                <a href="#" class="label label-info" rel="popover" data-content="{% for g in net.get_virtualnics %}<p>{{ g.guest.name }}</p>{% endfor %}">{{ net.get_virtualnics | length }} VMs</a>
-                                            </div>
-                                        </div>
-                                     {% endif %}
-                                     {% endfor %}
+                        {% for net in networks %}
+                            {% if net.vswitch.name == vs.name %}
+                                <div class="row">
+                                    <div class="col-md-1"></div>
+                                    <div class="col-md-3">{{ net.name }}</div>
+                                    <div class="col-md-3">
+                                    {% if net.vlanId %}
+                                        vlan: {{ net.vlanId }}
+                                    {% endif %}
+                                    </div>
+                                    <div class="col-md-1"></div>
+                                    <div class="col-md-2">
+                                        <a href="#" class="label label-info" rel="popover" data-content="{% for g in net.get_virtualnics %}<p>{{ g.guest.name }}</p>{% endfor %}">{{ net.get_virtualnics | length }} VMs</a>
                                     </div>
                                 </div>
-                            </div>
-                        {% endif %}
-                        {% endfor %}
+                             {% endif %}
+                         {% endfor %}
                         </div>
-                    </div>
-                </div>
+                    </td>
+                </tr>
             {% endfor %}
+            </table>
         </div>
     </div>
 
