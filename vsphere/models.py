@@ -90,8 +90,6 @@ class Guest(models.Model):
         return disk_reserved
 
 
-
-
 class Datastore(models.Model):
     name = models.CharField(max_length=100)
     capacity = models.IntegerField()
