@@ -1,34 +1,156 @@
 {% extends "head.html" %}
 {% load multiply %}
+{% load divide %}
+{% load percent %}
 {% block title %}
-    vSphere - Resource Pool
+    vSphere - {{ data.name }}
 {% endblock %}
 {% block content %}
+
+    <script src="//code.highcharts.com/highcharts.js"></script>
+    <script src="//code.highcharts.com/modules/exporting.js"></script>
+    <div class="alert alert-info">Statistics for Resource Pool {{ data.name }}</div>
     <div class="row">
-        {% for rp in resource_pool|dictsort:"mem_reserved" %}
-            <div class="col-md-3">
-                <div class="well">
-                    <h2>{{ rp.name }}</h2>
-                    <table class="table table-condensed">
-                        <tr>
-                            <td>Guests</td>
-                            <td>{{ rp.num_vm }}</td>
-                        </tr>
-                        <tr>
-                            <td>Memory</td>
-                            <td>{{ rp.mem_reserved | multiply:1048576 | filesizeformat }}</td>
-                        </tr>
-                        <tr>
-                            <td>CPU</td>
-                            <td>{{ rp.vcpu_reserved }}</td>
-                        </tr>
-                        <tr>
-                            <td>Disk</td>
-                            <td>{{ rp.disk_reserved| multiply:1048576 | filesizeformat }}</td>
-                        </tr>
-                    </table>
-                </div>
+        <div class="col-md-5">
+            <div class="panel panel-default">
+                <div id="DatacenterPieChart"></div>
             </div>
-        {% endfor %}
+        </div>
+        <div class="col-md-7">
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>Total</strong></div>
+                <table class="table table-condensed table-striped">
+                    <tr>
+                        <td><strong>Memory</strong></td>
+                        <td>{{ data.memory_sum | multiply:1048576 | filesizeformat }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Storage</strong></td>
+                        <td>{{ data.storage_sum | multiply:1048576 | filesizeformat }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>vCPU</strong></td>
+                        <td>{{ data.vcpu_sum }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>Averages</strong></div>
+                <table class="table table-condensed table-striped">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th>Minimum</th>
+                        <th>Maxium</th>
+                        <th>Avgerage</th>
+                        <th>Deviation</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><strong>Memory</strong></td>
+                        <td>{{ data.memory_min | multiply:1048576 | filesizeformat }}</td>
+                        <td>{{ data.memory_max | multiply:1048576 | filesizeformat }}</td>
+                        <td>{{ data.memory_avg | multiply:1048576 | filesizeformat }}</td>
+                        <td>{{ data.memory_dev | floatformat }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Storage</strong></td>
+                        <td>{{ data.storage_min | multiply:1048576 | filesizeformat }}</td>
+                        <td>{{ data.storage_max | multiply:1048576 | filesizeformat }}</td>
+                        <td>{{ data.storage_avg | multiply:1048576 | filesizeformat }}</td>
+                        <td>{{ data.storage_dev | floatformat }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>vCPU</strong></td>
+                        <td>{{ data.vcpu_min }}</td>
+                        <td>{{ data.vcpu_max }}</td>
+                        <td>{{ data.vcpu_avg | floatformat }}</td>
+                        <td>{{ data.vcpu_dev | floatformat }}</td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
     </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><span class="glyphicon glyphicon-cloud"></span><strong>  Guest  -  </strong>{{ data.guests | length }} vm(s)</div>
+        <table class="table table-striped table-hover">
+            <thead>
+            <tr>
+                <th>Hostname</th>
+                <th>Status</th>
+                <th>Memory</th>
+                <th>Disk</th>
+                <th>vCPU</th>
+                <th>Datacenter</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for guest in data.guests %}
+                <tr style="cursor: pointer;" onclick="document.location = '/guest/?name={{ guest.name }}';">
+                    <td>{{ guest.name }}</td>
+                    <td>
+                        {% if guest.poweredOn %}
+                            <span class="label label-primary">
+                        <span class="glyphicon glyphicon-play"></span>
+                    </span>
+                        {% else %}
+                            <span class="label label-danger">
+                        <span class="glyphicon glyphicon-stop"></span>
+                    </span>
+                        {% endif %}
+                    </td>
+                    <td>{{ guest.memory | multiply:1048576 | filesizeformat }}</td>
+                    <td>{{ guest.get_disk_reserved | multiply:1048576 | filesizeformat }}</td>
+                    <td>{{ guest.vcpu }}</td>
+                    <td>{{ guest.hypervisor.datacenter }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+
+    <script>
+        $(function () {
+            var chart;
+            $(document).ready(function () {
+                chart = new Highcharts.Chart({
+                    credits: {
+                        enabled: false
+                    },
+                    chart: {
+                        renderTo: 'DatacenterPieChart'
+                    }, title: {
+                        text: 'Datacenter Implantation'
+                    }, tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.point.name + '</b>: ' + this.y.toFixed(0);
+                        }
+                    }, exporting: {
+                        enabled: false
+                    }, plotOptions: {
+                        pie: {
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return '<b>' + this.point.name + '</b>: ' + Math.round(this.percentage) + ' % <br/>' + this.y.toFixed(0);
+                                }
+                            }
+                        }
+                    }, series: [
+                        {
+                            type: 'pie',
+                            data: [
+                                {% for dc  in data.dc_count_guest %}
+                                    [ '{{ dc.name }}', {{ dc.count }} ],
+                                {% endfor %}
+                            ]
+                        }
+                    ]
+                });
+            });
+        });
+    </script>
 {% endblock %}

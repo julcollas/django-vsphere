@@ -1,0 +1,284 @@
+{% extends "head.html" %}
+{% load divide %}
+
+{% block title %}
+    vSphere - Datacenter Vision
+{% endblock %}
+{% block content %}
+    <script src="//code.highcharts.com/highcharts.js"></script>
+    <script src="//code.highcharts.com/highcharts-more.js"></script>
+    <script src="//code.highcharts.com/modules/exporting.js"></script>
+    <div class="alert alert-info">Statistics by Datacenter</div>
+    {% for datacenter in data %}
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-md-11">
+                        Statistics for {{ datacenter.datacenter }}
+                    </div>
+                    <div class="col-md-1"  align="right">
+                        {{ datacenter.hypervisor }} Hypervisors
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="panel panel-default">
+                            <div id="MemoryPieChart{{ datacenter.datacenter }}"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="panel panel-default">
+                            <div id="DiskPieChart{{ datacenter.datacenter }}"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="panel panel-default">
+                            <div id="CpuGaugeChar{{ datacenter.datacenter }}"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div id="GuestColumnChart{{ datacenter.datacenter }}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <script>
+    function humanize_filesize(fs) {
+        if (fs >= 1099511627776) {
+            return round_number(fs / 1099511627776, 2) + ' TB';
+        }
+        if (fs >= 1073741824) {
+            return round_number(fs / 1073741824, 2) + ' GB';
+        }
+        if (fs >= 1048576) {
+            return round_number(fs / 1048576, 2) + ' MB';
+        }
+        if (fs >= 1024) {
+            return round_number(fs / 1024, 0) + ' KB';
+        }
+        return fs + ' B';
+    }
+
+        function round_number(num, dec) {
+            return Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
+        }
+
+        $(function () {
+            var chart;
+            $(document).ready(function () {
+                chart = new Highcharts.Chart({
+                    credits: {
+                        enabled: false
+                    },
+                    chart: {
+                        renderTo: 'MemoryPieChart{{ datacenter.datacenter }}'
+                    }, title: {
+                        text: 'Memory'
+                    }, subtitle: {
+                        text: 'Total: ' +humanize_filesize('{{ datacenter.memory}}' * 1048576)
+                    }, tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.point.name + '</b>: ' + humanize_filesize(this.y * 1048576);
+                        }
+                    }, exporting: {
+                        enabled: false
+                    }, plotOptions: {
+                        pie: {
+                            dataLabels: {
+                                enabled: true,
+                                distance: -60,
+                                color: 'white',
+                                formatter: function () {
+                                    return this.point.name;
+                                }
+                            }
+                        }
+                    }, series: [
+                        {
+                            type: 'pie',
+                            data: [
+                                [ 'Reserved', {{ datacenter.mem_reserved }} ],
+                                [ 'Available', ({{ datacenter.memory}} - {{ datacenter.mem_reserved }}) ]
+                            ]
+                        }
+                    ]
+                });
+            });
+        });
+
+        $(function () {
+            var chart;
+            $(document).ready(function () {
+                chart = new Highcharts.Chart({
+                    credits: {
+                        enabled: false
+                    },
+                    chart: {
+                        renderTo: 'DiskPieChart{{ datacenter.datacenter }}'
+                    }, title: {
+                        text: 'Storage'
+                    }, subtitle: {
+                        text: 'Total: '+ humanize_filesize('{{ datacenter.storage}}' * 1048576)
+                    }, tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.point.name + '</b>: ' + humanize_filesize(this.y * 1048576);
+                        }
+                    }, exporting: {
+                        enabled: false
+                    }, plotOptions: {
+                        pie: {
+                            dataLabels: {
+                                enabled: true,
+                                distance: -50,
+                                color: 'white',
+                                formatter: function () {
+                                    return this.point.name;
+                                }
+                            }
+                        }
+                    }, series: [
+                        {
+                            type: 'pie',
+                            data: [
+                                [ 'Reserved', {{ datacenter.disk_reserved }} ],
+                                [ 'Available', ({{ datacenter.storage}} - {{ datacenter.disk_reserved }}) ]
+                            ]
+                        }
+                    ]
+                });
+            });
+        });
+
+        $(function () {
+            var chart;
+            $(document).ready(function () {
+                chart = new Highcharts.Chart({
+                    credits: {
+                        enabled: false
+                    }, exporting: {
+                        enabled: false
+                    }, chart: {
+                        type: 'gauge',
+                        plotBackgroundColor: null,
+                        plotBackgroundImage: null,
+                        plotBorderWidth: 0,
+                        plotShadow: false,
+                        renderTo: 'CpuGaugeChar{{ datacenter.datacenter }}'
+                    }, title: {
+                        text: 'Consolidation'
+                    }, subtitle: {
+                        text: 'Physical Threads: {{ datacenter.threads }} <br/> vCPU Reserved: {{ datacenter.vcpu_reserved }}'
+                    }, pane: {
+                        startAngle: -150,
+                        endAngle: 150,
+                        backgroundColor: '#E4E3DF'
+                    }, yAxis: {
+                        min: 0,
+                        max: 4,
+
+                        minorTickInterval: 'auto',
+                        minorTickWidth: 1,
+                        minorTickLength: 10,
+                        minorTickPosition: 'inside',
+                        minorTickColor: '#666',
+
+                        tickPixelInterval: 30,
+                        tickWidth: 2,
+                        tickPosition: 'inside',
+                        tickLength: 10,
+                        tickColor: '#666',
+                        labels: {
+                            step: 2,
+                            rotation: 'auto'
+                        },  title: {
+                            text: 'conso'
+                        }, plotBands: [{
+                                from: 0,
+                                to: 1,
+                                color: '#DF5353'
+                            }, {
+                                from: 1,
+                                to: 4,
+                                color: '#55BF3B'
+                            }]
+                    }, series: [{
+                        name: 'consolidation',
+                        data: [
+                            ({{ datacenter.vcpu_reserved|divide:datacenter.threads }})
+                        ]
+                    }]
+                });
+            });
+        });
+
+        {% regroup guest_rp_dc|dictsort:"num_vm" by num_vm as resource_pool_vm %}
+        $(function () {
+            var chart;
+            $(document).ready(function () {
+                chart = new Highcharts.Chart({
+                    credits: {
+                        enabled: false
+                    },
+                    chart: {
+                        renderTo: 'GuestColumnChart{{ datacenter.datacenter }}'
+                    }, title: {
+                        text: 'Number of Guests'
+                    }, subtitle: {
+                        text: 'Total: {{ datacenter.guest }} vms'
+                    }, yAxis: {
+                        title: {
+                            text: 'vm'
+                        }
+                    }, xAxis: {
+                        categories: [
+                            {% for rp in country_list %}
+                                {% for a in rp.list %}
+                                    '{{ a.name}}',
+                                {% endfor %}
+                            {% endfor %}
+                            ],
+                        labels: {
+                            rotation: -45,
+                            align: 'right'
+                        }
+                    }, tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.point.name + '</b>: ' + this.y + ' vms';
+                        }
+                    }, exporting: {
+                        enabled: false
+                    }, plotOptions: {
+                        column: {
+                            dataLabels: {
+                                enabled: false
+                            }
+                        }
+                    }, legend: {
+                        enabled: false
+                    }, series: [
+                        {
+                            type: 'column',
+                            data: [
+                                {% for dc in guest_rp_dc %}
+                                    {% if dc.name == datacenter.datacenter %}
+                                        {% for key, value in dc.items %}
+                                            {% if key != 'name' %}
+                                                [ '{{ key }}', {{ value }} ],
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            ]
+                        }
+                    ]
+                });
+            });
+        });
+    </script>
+{% endfor%}
+{% endblock %}

@@ -206,7 +206,7 @@
             </thead>
             <tbody>
             {% for guest in guests %}
-                <tr onclick="document.location = '/guest/?name={{ guest.name }}';">
+                <tr style="cursor: pointer;" onclick="document.location = '/guest/?name={{ guest.name }}';">
                     <td>{{ guest.name }}</td>
                     <td>
                         {% if guest.poweredOn %}

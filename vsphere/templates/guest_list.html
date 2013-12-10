@@ -16,7 +16,7 @@
         </thead>
         <tbody>
         {% for guest in guest_list %}
-        <tr>
+        <tr style="cursor: pointer;">
             <td onclick="document.location = '/guest/?name={{ guest.name }}';">{{ guest.name }}</td>
             <td onclick="document.location = '/guest/?name={{ guest.name }}';">{{ guest.resourcePool }}</td>
             <td onclick="document.location = '/guest/?name={{ guest.name }}';">{{ guest.memory | multiply:1048576 | filesizeformat }}</td>

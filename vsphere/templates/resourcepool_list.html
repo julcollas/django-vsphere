@@ -1,0 +1,30 @@
+{% load multiply %}
+{% load percent %}
+
+{% block content %}
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Hosted Guest</th>
+            <th>Average Memory</th>
+            <th>Average Storage</th>
+            <th>Average vCPU</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% regroup resourcepool_list|dictsort:"name" by name as resourcepool_list_name %}
+        {% for a in resourcepool_list_name %}
+            {% for rp in a.list %}
+            <tr style="cursor: pointer;" onclick="document.location = '/resourcepool/?name={{ rp.name }}';">
+                <td>{{ rp.name }}</td>
+                <td>{{ rp.guests | length }}</td>
+                <td>{{ rp.memory_avg | multiply:1048576 | filesizeformat }}</td>
+                <td>{{ rp.storage_avg | multiply:1048576 | filesizeformat }}</td>
+                <td>{{ rp.vcpu_avg | floatformat }}</td>
+            </tr>
+            {% endfor %}
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

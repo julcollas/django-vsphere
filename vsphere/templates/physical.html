@@ -1,18 +1,15 @@
 {% extends "head.html" %}
 {% block title %}
-    vSphere - Top 10 Resource Pool
+    vSphere - Global Vision
 {% endblock %}
 {% block content %}
     <script src="//code.highcharts.com/highcharts.js"></script>
     <script src="//code.highcharts.com/modules/exporting.js"></script>
-    <div class="alert alert-info">
-        <p>Top 10 resources pool</p>
-    </div>
-
+    <div class="alert alert-info">Physical resources installed</div>
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-default">
-                <div id="GuestColumnChart"></div>
+                <div id="HypervisorColumnChart"></div>
             </div>
         </div>
         <div class="col-md-6">
@@ -27,7 +24,17 @@
         </div>
         <div class="col-md-6">
             <div class="panel panel-default">
-                <div id="VcpuPieChart"></div>
+                <div id="ThreadsPieChart"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div id="ESXiVersionPie"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div id="LinkSpeedPie"></div>
             </div>
         </div>
     </div>
@@ -64,7 +71,7 @@
                     chart: {
                         renderTo: 'MemoryPieChart'
                     }, title: {
-                        text: 'Memory'
+                        text: 'Physical Memory'
                     }, tooltip: {
                         formatter: function () {
                             return '<b>' + this.point.name + '</b>: ' + humanize_filesize(this.y * 1048576);
@@ -84,10 +91,8 @@
                         {
                             type: 'pie',
                             data: [
-                                {% for rp in resource_pool %}
-                                    {% if rp.name in top10_mem %}
-                                        [ '{{ rp.name}}', {{ rp.mem_reserved }} ],
-                                    {% endif %}
+                                {% for dc  in data %}
+                                    [ '{{ dc.datacenter }}', {{ dc.memory }} ],
                                 {% endfor %}
                             ]
                         }
@@ -95,7 +100,6 @@
                 });
             });
         });
-
 
         $(function () {
             var chart;
@@ -107,7 +111,7 @@
                     chart: {
                         renderTo: 'DiskPieChart'
                     }, title: {
-                        text: 'Storage'
+                        text: 'Physical Storage'
                     }, tooltip: {
                         formatter: function () {
                             return '<b>' + this.point.name + '</b>: ' + humanize_filesize(this.y * 1048576);
@@ -127,10 +131,8 @@
                         {
                             type: 'pie',
                             data: [
-                                {% for rp in resource_pool %}
-                                    {% if rp.name in top10_disk %}
-                                        [ '{{ rp.name}}', {{ rp.disk_reserved }} ],
-                                    {% endif %}
+                                {% for dc  in data %}
+                                    [ '{{ dc.datacenter }}', {{ dc.storage }} ],
                                 {% endfor %}
                             ]
                         }
@@ -147,9 +149,9 @@
                         enabled: false
                     },
                     chart: {
-                        renderTo: 'VcpuPieChart'
+                        renderTo: 'ThreadsPieChart'
                     }, title: {
-                        text: 'vCpu'
+                        text: 'Physical CPU Threads'
                     }, tooltip: {
                         formatter: function () {
                             return '<b>' + this.point.name + '</b>: ' + this.y.toFixed(0);
@@ -169,10 +171,8 @@
                         {
                             type: 'pie',
                             data: [
-                                {% for rp in resource_pool %}
-                                    {% if rp.name in top10_cpu %}
-                                        [ '{{ rp.name}}', {{ rp.vcpu_reserved }} ],
-                                    {% endif %}
+                                {% for dc in data %}
+                                    [ '{{ dc.datacenter }}', {{ dc.threads }} ],
                                 {% endfor %}
                             ]
                         }
@@ -181,7 +181,7 @@
             });
         });
 
-        {% regroup resource_pool|dictsort:"num_vm" by num_vm as resource_pool_vm %}
+        {% regroup data|dictsort:"hypervisor" by hypervisor as data_hypervisor %}
         $(function () {
             var chart;
             $(document).ready(function () {
@@ -190,14 +190,14 @@
                         enabled: false
                     },
                     chart: {
-                        renderTo: 'GuestColumnChart'
+                        renderTo: 'HypervisorColumnChart'
                     }, title: {
-                        text: 'Number of Guests'
+                        text: 'Number of Hypervisors'
                     }, yAxis: {
                         title: {
                             text: 'vm'
                         }
-                    }, xAxis: {
+	                 }, xAxis: {
                         categories: [
                             {% for rp in country_list %}
                                 {% for a in rp.list %}
@@ -211,7 +211,7 @@
                         }
                     }, tooltip: {
                         formatter: function () {
-                            return '<b>' + this.point.name + '</b>: ' + this.y + ' vms';
+                            return '<b>' + this.point.name + '</b>: ' + this.y + ' hypervisors';
                         }
                     }, exporting: {
                         enabled: false
@@ -227,11 +227,9 @@
                         {
                             type: 'column',
                             data: [
-                                {% for rp in resource_pool_vm %}
-                                    {% for a in rp.list %}
-                                        {% if a.name in top10_mem %}
-                                            [ '{{ a.name}}', {{ a.num_vm }} ],
-                                        {% endif %}
+                                {% for dc in data_hypervisor %}
+                                    {% for a in dc.list %}
+                                        [ '{{ a.datacenter}}', {{ a.hypervisor }} ],
                                     {% endfor %}
                                 {% endfor %}
                             ]
@@ -240,5 +238,87 @@
                 });
             });
         });
+
+        $(function () {
+            var chart;
+            $(document).ready(function () {
+                chart = new Highcharts.Chart({
+                    credits: {
+                        enabled: false
+                    },
+                    chart: {
+                        renderTo: 'ESXiVersionPie'
+                    }, title: {
+                        text: 'ESXi Version'
+                    }, tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.point.name + '</b>: ' + this.y + ' hypervisors';
+                        }
+                    }, exporting: {
+                        enabled: false
+                    }, plotOptions: {
+                        pie: {
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return '<b>' + this.point.name + '</b>: ' + Math.round(this.percentage) + ' % <br/>' + this.y + ' hypervisors';
+                                }
+                            }
+                        }
+                    }, series: [
+                        {
+                            type: 'pie',
+                            data: [
+                                {% for key, value in esxiversion.items %}
+                                    [ '{{ key }}', {{ value }} ],
+                                {% endfor %}
+                            ]
+                        }
+                    ]
+                });
+            });
+        });
+
+        $(function () {
+            var chart;
+            $(document).ready(function () {
+                chart = new Highcharts.Chart({
+                    credits: {
+                        enabled: false
+                    },
+                    chart: {
+                        renderTo: 'LinkSpeedPie'
+                    }, title: {
+                        text: 'Network Interface Speed'
+                    }, tooltip: {
+                        formatter: function () {
+                            return '<b>' + humanize_filesize(this.point.name * 1024/1000 * 1048576) + '</b>: ' + this.y + ' interfaces';
+                        }
+                    }, exporting: {
+                        enabled: false
+                    }, plotOptions: {
+                        pie: {
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return '<b>' + humanize_filesize(this.point.name * 1024/1000 * 1048576) + '</b>: ' + Math.round(this.percentage) + ' % <br/>' + this.y + ' interfaces';
+                                }
+                            }
+                        }
+                    }, series: [
+                        {
+                            type: 'pie',
+                            data: [
+                                {% for key, value in linkspeed.items %}
+                                    [ '{{ key }}', {{ value }} ],
+                                {% endfor %}
+                            ]
+                        }
+                    ]
+                });
+            });
+        });
+
+
     </script>
 {% endblock %}

@@ -16,7 +16,7 @@
         </thead>
         <tbody>
         {% for hv in hypervisor_list %}
-            <tr onclick="document.location = '/hypervisor/?name={{ hv.name }}';">
+            <tr style="cursor: pointer;" onclick="document.location = '/hypervisor/?name={{ hv.name }}';">
                 <td>{{ hv.name }}</td>
                 <td>{{ hv.get_number_guest }}</td>
                 <td>

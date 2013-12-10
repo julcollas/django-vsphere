@@ -1,37 +1,36 @@
 {% extends "head.html" %}
 {% block title %}
-    vSphere - Top 10 Resource Pool
+    vSphere - By Resource Pool
 {% endblock %}
 {% block content %}
     <script src="//code.highcharts.com/highcharts.js"></script>
     <script src="//code.highcharts.com/modules/exporting.js"></script>
     <div class="alert alert-info">
-        <p>Top 10 resources pool</p>
+        <p>Reserved resources by Resource Pool</p>
     </div>
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="panel panel-default">
                 <div id="GuestColumnChart"></div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="panel panel-default">
-                <div id="MemoryPieChart"></div>
+                <div id="MemoryColumnChart"></div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="panel panel-default">
-                <div id="DiskPieChart"></div>
+                <div id="DiskColumnChart"></div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="panel panel-default">
-                <div id="VcpuPieChart"></div>
+                <div id="VcpuColumnChart"></div>
             </div>
         </div>
     </div>
-
     <script>
 
         function round_number(num, dec) {
@@ -54,6 +53,7 @@
             return fs + ' B';
         }
 
+        {% regroup resource_pool|dictsort:"mem_reserved" by mem_reserved as resource_pool_mem %}
         $(function () {
             var chart;
             $(document).ready(function () {
@@ -62,9 +62,29 @@
                         enabled: false
                     },
                     chart: {
-                        renderTo: 'MemoryPieChart'
+                        renderTo: 'MemoryColumnChart'
                     }, title: {
-                        text: 'Memory'
+                        text: 'Reserved Memory'
+                    }, yAxis: {
+                        title: {
+                            text: 'Memory ( B )'
+                        }, labels: {
+                            formatter: function() {
+                                return humanize_filesize(this.value * 1024/1000 * 1048576);
+                            }
+                        }
+	                }, xAxis: {
+                        categories: [
+                            {% for rp in country_list %}
+                                {% for a in rp.list %}
+                                    '{{ a.name}}',
+                                {% endfor %}
+                            {% endfor %}
+                            ],
+                        labels: {
+                            rotation: -45,
+                            align: 'right'
+                        }
                     }, tooltip: {
                         formatter: function () {
                             return '<b>' + this.point.name + '</b>: ' + humanize_filesize(this.y * 1048576);
@@ -72,22 +92,21 @@
                     }, exporting: {
                         enabled: false
                     }, plotOptions: {
-                        pie: {
+                        column: {
                             dataLabels: {
-                                enabled: true,
-                                formatter: function () {
-                                    return '<b>' + this.point.name + '</b>: ' + Math.round(this.percentage) + ' % <br/>' + humanize_filesize(this.y * 1048576);
-                                }
+                                enabled: false
                             }
                         }
+                    }, legend: {
+                        enabled: false
                     }, series: [
                         {
-                            type: 'pie',
+                            type: 'column',
                             data: [
-                                {% for rp in resource_pool %}
-                                    {% if rp.name in top10_mem %}
-                                        [ '{{ rp.name}}', {{ rp.mem_reserved }} ],
-                                    {% endif %}
+                                {% for rp in resource_pool_mem %}
+                                    {% for a in rp.list %}
+                                        [ '{{ a.name}}', {{ a.mem_reserved }} ],
+                                    {% endfor %}
                                 {% endfor %}
                             ]
                         }
@@ -96,7 +115,7 @@
             });
         });
 
-
+        {% regroup resource_pool|dictsort:"disk_reserved" by disk_reserved as resource_pool_disk %}
         $(function () {
             var chart;
             $(document).ready(function () {
@@ -105,9 +124,29 @@
                         enabled: false
                     },
                     chart: {
-                        renderTo: 'DiskPieChart'
+                        renderTo: 'DiskColumnChart'
                     }, title: {
-                        text: 'Storage'
+                        text: 'Reserved Storage'
+                    }, yAxis: {
+                        title: {
+                            text: 'Space ( B )'
+                        }, labels: {
+                                formatter: function() {
+                                    return humanize_filesize(this.value * 1024/1000 * 1048576);
+                                }
+                        }
+	                 }, xAxis: {
+                        categories: [
+                            {% for rp in country_list %}
+                                {% for a in rp.list %}
+                                    '{{ a.name}}',
+                                {% endfor %}
+                            {% endfor %}
+                            ],
+                        labels: {
+                            rotation: -45,
+                            align: 'right'
+                        }
                     }, tooltip: {
                         formatter: function () {
                             return '<b>' + this.point.name + '</b>: ' + humanize_filesize(this.y * 1048576);
@@ -115,22 +154,21 @@
                     }, exporting: {
                         enabled: false
                     }, plotOptions: {
-                        pie: {
+                        column: {
                             dataLabels: {
-                                enabled: true,
-                                formatter: function () {
-                                    return '<b>' + this.point.name + '</b>: ' + Math.round(this.percentage) + ' % <br/>' + humanize_filesize(this.y * 1048576);
-                                }
+                                enabled: false
                             }
                         }
+                    }, legend: {
+                        enabled: false
                     }, series: [
                         {
-                            type: 'pie',
+                            type: 'column',
                             data: [
-                                {% for rp in resource_pool %}
-                                    {% if rp.name in top10_disk %}
-                                        [ '{{ rp.name}}', {{ rp.disk_reserved }} ],
-                                    {% endif %}
+                                {% for rp in resource_pool_disk %}
+                                    {% for a in rp.list %}
+                                        [ '{{ a.name}}', {{ a.disk_reserved }} ],
+                                    {% endfor %}
                                 {% endfor %}
                             ]
                         }
@@ -139,6 +177,7 @@
             });
         });
 
+        {% regroup resource_pool|dictsort:"vcpu_reserved" by vcpu_reserved as resource_pool_vcpu %}
         $(function () {
             var chart;
             $(document).ready(function () {
@@ -147,32 +186,47 @@
                         enabled: false
                     },
                     chart: {
-                        renderTo: 'VcpuPieChart'
+                        renderTo: 'VcpuColumnChart'
                     }, title: {
-                        text: 'vCpu'
+                        text: 'Reserved vCpu'
+                    }, yAxis: {
+                        title: {
+                            text: 'vcpu'
+                        }
+	                 }, xAxis: {
+                        categories: [
+                            {% for rp in country_list %}
+                                {% for a in rp.list %}
+                                    '{{ a.name}}',
+                                {% endfor %}
+                            {% endfor %}
+                            ],
+                        labels: {
+                            rotation: -45,
+                            align: 'right'
+                        }
                     }, tooltip: {
                         formatter: function () {
-                            return '<b>' + this.point.name + '</b>: ' + this.y.toFixed(0);
+                            return '<b>' + this.point.name + '</b>: ' + this.y;
                         }
                     }, exporting: {
                         enabled: false
                     }, plotOptions: {
-                        pie: {
+                        column: {
                             dataLabels: {
-                                enabled: true,
-                                formatter: function () {
-                                    return '<b>' + this.point.name + '</b>: ' + Math.round(this.percentage) + ' % <br/>' + this.y.toFixed(0);
-                                }
+                                enabled: false
                             }
                         }
+                    }, legend: {
+                        enabled: false
                     }, series: [
                         {
-                            type: 'pie',
+                            type: 'column',
                             data: [
-                                {% for rp in resource_pool %}
-                                    {% if rp.name in top10_cpu %}
-                                        [ '{{ rp.name}}', {{ rp.vcpu_reserved }} ],
-                                    {% endif %}
+                                {% for rp in resource_pool_vcpu %}
+                                    {% for a in rp.list %}
+                                        [ '{{ a.name}}', {{ a.vcpu_reserved }} ],
+                                    {% endfor %}
                                 {% endfor %}
                             ]
                         }
@@ -197,7 +251,7 @@
                         title: {
                             text: 'vm'
                         }
-                    }, xAxis: {
+	                 }, xAxis: {
                         categories: [
                             {% for rp in country_list %}
                                 {% for a in rp.list %}
@@ -229,9 +283,7 @@
                             data: [
                                 {% for rp in resource_pool_vm %}
                                     {% for a in rp.list %}
-                                        {% if a.name in top10_mem %}
-                                            [ '{{ a.name}}', {{ a.num_vm }} ],
-                                        {% endif %}
+                                        [ '{{ a.name}}', {{ a.num_vm }} ],
                                     {% endfor %}
                                 {% endfor %}
                             ]

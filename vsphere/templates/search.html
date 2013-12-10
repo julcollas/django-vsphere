@@ -5,16 +5,23 @@
     vSphere - Search
 {% endblock %}
 {% block content %}
+    {% if resourcepool_list %}
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>{{ resourcepool_list |length }} Resource Pools</strong></div>
+            {% include "resourcepool_list.html" %}
+        </div>
+    {% endif %}
+
     {% if hypervisor_list %}
         <div class="panel panel-default">
-            <div class="panel-heading"><strong>{{ hypervisor_list | length }} Hypervisors</strong></div>
+            <div class="panel-heading"><strong>{{ hypervisor_list |length }} Hypervisors</strong></div>
             {% include "hypervisor_list.html" %}
         </div>
     {% endif %}
 
     {% if guest_list %}
         <div class="panel panel-default">
-            <div class="panel-heading"><strong>{{ guest_list | length }} Guests</strong></div>
+            <div class="panel-heading"><strong>{{ guest_list |length }} Guests</strong></div>
             {% include "guest_list.html" %}
         </div>
     {% endif %}

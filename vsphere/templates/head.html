@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-ng-app="esxiApp">
+<html>
 <head>
     <meta charset="utf-8">
     <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
@@ -27,23 +27,8 @@
         .navbar-inverse .navbar-brand {
             color: white;
         }
-
         a:hover {
             text-decoration: none;
-        }
-
-        a {
-            color: black;
-        }
-
-        .pagination>.active>a,
-        .pagination>.active>span,
-        .pagination>.active>a:hover,
-        .pagination>.active>span:hover,
-        .pagination>.active>a:focus,
-        .pagination>.active>span:focus {
-            background-color: black;
-            border-color: black;
         }
     </style>
 
@@ -52,7 +37,7 @@
             $('#search').autocomplete({
                 source: function (requete, reponse) {
                     $.ajax({
-                        url: '/api/guest',
+                        url: '/api/v1/guest',
                         dataType: 'json',
                         data: {
                             name__icontains: $('#search').val(),
@@ -96,13 +81,19 @@
                 <ul class="nav navbar-nav">
                     <li><a href="#" onclick="document.location = '/hypervisors';">Hypervisors</a></li>
                     <li><a href="#" onclick="document.location = '/guests';">Guests</a></li>
+                    <li><a href="#" onclick="document.location = '/resourcepools';">Resource Pools</a></li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Statistics <b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="#" onclick="document.location = '/top10';">Top 10</a></li>
-                            <li><a href="#" onclick="document.location = '/resourcepool';">Resource Pool</a></li>
+                            <li><a href="#" onclick="document.location = '/datacenter';">By Datacenter</a></li>
+                            <li><a href="#" onclick="document.location = '/physical';">Physically installed</a></li>
+                            <li role="presentation" class="divider"></li>
+                            <li role="presentation" class="dropdown-header">By Resource Pool</li>
+                            <li><a href="#" onclick="document.location = '/resourcepoolstats';">All</a></li>
+                            <li><a href="#" onclick="document.location = '/top10resourcepools';">Top 10</a></li>
                         </ul>
                     </li>
+                    <li><a data-toggle="modal" data-target="#myModal" href="#"><span class="glyphicon glyphicon-book"></span> Help</a></li>
                 </ul>
                 <form name="search" class="navbar-form navbar-right" role="search"
                       onsubmit="window.location.href = '/search/?filter=' + document.forms['search']['search'].value; return false">
@@ -116,6 +107,35 @@
         <div class="col-md-1"></div>
     </div>
 </header>
+
+<div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">Help</h4>
+            </div>
+            <div class="modal-body">
+                <h4>Hypervisor</h4>
+                <p>A hypervisor, also called a <strong>virtual machine manager</strong>, is a server than can hosts multiple guest instances called virtual machine.</p>
+                <hr>
+                <h4>Guest</h4>
+                <p>A guest, also called a virtual machine or <strong>vm</strong>, is a virtual instance hosted on a hypervisor.</p>
+                <hr>
+                <h4>CPU Thread</h4>
+                <p>A thread is merely an ordered sequence of instructions. A <strong>"multithreaded processor,"</strong> is a processor that can execute multiple instruction streams simultaneously.</p>
+                <hr>
+                <h4>vCPU</h4>
+                <p>A vcpu, is the short for <strong>virtual cpu</strong>. This is the representation of a CPU for the guest or the vm.</p>
+                <hr>
+                <h4>Consolidation</h4>
+                <p>Consolidation is the number of virtual cpu (vcpu) per Physical Threads. <strong>(vcpu  &divide threads)</strong></p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 
 <div class="row">
     <div class="col-md-1"></div>
