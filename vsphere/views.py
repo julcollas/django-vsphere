@@ -94,7 +94,7 @@ def resourcepools_info(request):
 
 def stats_by_resourcepool(request):
     data = resourcepools_info(request)
-    return render_to_response('../../django-vsphere/vsphere/templates/stats_by_resourcepool.html',
+    return render_to_response('stats_by_resourcepool.html',
                               data,
                               context_instance=RequestContext(request))
 
@@ -139,7 +139,6 @@ def resourcepool_info(rp):
             dc_dict[dc] = 1
         else:
             dc_dict[dc] += 1
-    # ret_val = [{'name': 'frep', 'count': 2}, {'name': 'frcn', 'count': 10}]
     dc_count_guest = []
     for dc in dc_dict:
         dc_count_guest.append({'name': dc, 'count': dc_dict.get(dc)})
@@ -213,7 +212,7 @@ def resourcepools(request):
         'resourcepool_list': data_pag,
     }
 
-    return render_to_response('../../django-vsphere/vsphere/templates/resourcepools.html',
+    return render_to_response('resourcepools.html',
                               data,
                               context_instance=RequestContext(request))
 
@@ -404,7 +403,7 @@ def physical_statistics(request):
     data['esxiversion'] = sum_list_dict([x['esxiversion'] for x in data['data']])
     data['linkspeed'] = sum_list_dict([x['linkspeed'] for x in data['data']])
 
-    return render_to_response('../../django-vsphere/vsphere/templates/physical.html', data,
+    return render_to_response('physical.html', data,
                               context_instance=RequestContext(request))
 
 
@@ -428,5 +427,5 @@ def datacenter_statistics(request):
         temp['name'] = dc
         u.append(temp)
     data['guest_rp_dc'] = u
-    return render_to_response('../../django-vsphere/vsphere/templates/datacenter.html', data,
+    return render_to_response('datacenter.html', data,
                               context_instance=RequestContext(request))
