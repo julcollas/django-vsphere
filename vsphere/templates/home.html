@@ -9,8 +9,7 @@
         {% for dc in datacenter|dictsort:"name" %}
             <div class="col-md-4">
                 <div class="well">
-                    <a href="#" onclick="document.location = '/search/?filter={{ dc.name }}'">
-                    <h2>{{ dc.name }}</h2></a>
+                    <h2>{{ dc.name }}</h2>
                     <table class="table table-condensed">
                         <tr>
                             <td>Hypervisors</td>
