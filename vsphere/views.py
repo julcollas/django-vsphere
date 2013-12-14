@@ -220,8 +220,8 @@ def resourcepools(request):
 def hypervisors(request):
     hypervisor_list = Hypervisor.objects.all()
     hypervisor_list_sorted = sorted(hypervisor_list,
-                                    key=lambda a: (a.memoryReserved,
-                                                   a.diskReserved))
+                                    key=lambda a: (a.memoryReserved - a.memorySize,
+                                                   a.diskReserved - a.get_datastores_size()))
     paginator = Paginator(hypervisor_list_sorted, 25)
 
     page = request.GET.get('page')
