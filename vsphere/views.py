@@ -33,6 +33,7 @@ def home(request):
         mem = 0
         threads = 0
         vcpu_reserved = 0
+        raw_storage_reserved = 0
         for hv in hypervisors:
             num_vm += hv.get_number_guest()
             storage += hv.get_datastores_size()
@@ -41,6 +42,8 @@ def home(request):
             mem += hv.memorySize
             threads += hv.numCpuThreads
             vcpu_reserved += hv.vcpuReserved
+            raw_storage_reserved += hv.get_raw_disk_reserved()
+
         used_storage = int(100 * storage_reserved / storage)
         used_mem = int(100 * mem_reserved / mem)
         cpu_consolidation = float(vcpu_reserved) / threads
@@ -50,7 +53,8 @@ def home(request):
                 'nb_guest': num_vm,
                 'used_storage': used_storage,
                 'used_mem': used_mem,
-                'cpu_consolidation': cpu_consolidation
+                'cpu_consolidation': cpu_consolidation,
+                'raw_storage_reserved': raw_storage_reserved,
                 }
         ret_val.append(info)
 

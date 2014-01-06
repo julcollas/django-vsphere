@@ -47,6 +47,12 @@
                                 </div>
                             </td>
                         </tr>
+                        {% if dc.raw_storage_reserved  %}
+                        <tr>
+                            <td>Raw Storage</td>
+                            <td>{{ dc.raw_storage_reserved | multiply:1048576 | filesizeformat }}</td>
+                        </tr>
+                        {% endif %}
                     </table>
                 </div>
             </div>

@@ -1,4 +1,5 @@
 from django.core.validators import RegexValidator
+from django.db.models import Sum
 from django.db import models
 import re
 
@@ -61,6 +62,18 @@ class Hypervisor(models.Model):
             vcpu_reserved += int(guest.vcpu)
         return vcpu_reserved
     vcpuReserved = property(get_vcpu_reserved)
+
+    def get_raw_disk_reserved(self):
+        raw_disk_reserved = 0
+        guest_list = Guest.objects.filter(hypervisor=self)
+        print guest_list
+        for guest in guest_list:
+            try:
+                _temp = Disk.objects.filter(guest=guest, raw=True).aggregate(Sum('size'))
+                raw_disk_reserved += _temp.get('size__sum')
+            except:
+                pass
+        return raw_disk_reserved
 
 
 class Guest(models.Model):

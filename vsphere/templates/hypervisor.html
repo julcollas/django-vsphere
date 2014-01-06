@@ -153,6 +153,19 @@
                     </div>
                 </div>
             {% endfor %}
+            {% if hypervisor.get_raw_disk_reserved %}
+                <hr>
+                <div class="row">
+                    <div class="col-md-2">
+                        <strong>Total Raw Space</strong>
+                    </div>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2">{{ hypervisor.get_raw_disk_reserved | multiply:1048576 | filesizeformat }}</div>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2"></div>
+                </div>
+            {% endif %}
         </div>
     </div>
 
