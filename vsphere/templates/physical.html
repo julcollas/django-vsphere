@@ -22,7 +22,7 @@
                 <div id="DiskPieChart"></div>
             </div>
         </div>
-        {% if data.is_raw %}
+        {% if is_raw %}
             <div class="col-md-6">
                 <div class="panel panel-default">
                     <div id="RawPieChart"></div>
@@ -148,7 +148,7 @@
             });
         });
 	
-	{% if data.is_raw %}
+	{% if is_raw %}
 	$(function () {
             var chart;
             $(document).ready(function () {
