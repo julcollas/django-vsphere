@@ -22,6 +22,15 @@
                 <div id="DiskPieChart"></div>
             </div>
         </div>
+        {% for dc in data %}
+            {% if dc.raw %}
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div id="RawPieChart"></div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
         <div class="col-md-6">
             <div class="panel panel-default">
                 <div id="ThreadsPieChart"></div>
@@ -133,6 +142,46 @@
                             data: [
                                 {% for dc  in data %}
                                     [ '{{ dc.datacenter }}', {{ dc.storage }} ],
+                                {% endfor %}
+                            ]
+                        }
+                    ]
+                });
+            });
+        });
+
+	$(function () {
+            var chart;
+            $(document).ready(function () {
+                chart = new Highcharts.Chart({
+                    credits: {
+                        enabled: false
+                    },
+                    chart: {
+                        renderTo: 'RawPieChart'
+                    }, title: {
+                        text: 'Raw Storage'
+                    }, tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.point.name + '</b>: ' + humanize_filesize(this.y * 1048576);
+                        }
+                    }, exporting: {
+                        enabled: false
+                    }, plotOptions: {
+                        pie: {
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return '<b>' + this.point.name + '</b>: ' + Math.round(this.percentage) + ' % <br/>' + humanize_filesize(this.y * 1048576);
+                                }
+                            }
+                        }
+                    }, series: [
+                        {
+                            type: 'pie',
+                            data: [
+                                {% for dc  in data %}
+                                    [ '{{ dc.datacenter }}', {{ dc.raw }} ],
                                 {% endfor %}
                             ]
                         }
