@@ -22,15 +22,13 @@
                 <div id="DiskPieChart"></div>
             </div>
         </div>
-        {% for dc in data %}
-            {% if dc.raw %}
-                <div class="col-md-6">
-                    <div class="panel panel-default">
-                        <div id="RawPieChart"></div>
-                    </div>
+        {% if data.is_raw %}
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div id="RawPieChart"></div>
                 </div>
-            {% endif %}
-        {% endfor %}
+            </div>
+        {% endif %}
         <div class="col-md-6">
             <div class="panel panel-default">
                 <div id="ThreadsPieChart"></div>
@@ -149,7 +147,8 @@
                 });
             });
         });
-
+	
+	{% if data.is_raw %}
 	$(function () {
             var chart;
             $(document).ready(function () {
@@ -189,6 +188,7 @@
                 });
             });
         });
+        {% endif %}
 
         $(function () {
             var chart;
