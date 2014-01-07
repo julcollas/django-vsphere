@@ -367,7 +367,7 @@ def datacenter_info(request):
                                    'memory': 0, 'mem_reserved': 0, 'guest': 0,
                                    'hypervisor': 0, 'storage': 0,
                                    'esxiversion': [], 'disk_reserved': 0,
-                                   'linkspeed': []}
+                                   'linkspeed': [], 'raw': 0}
         ret_val[datacenter]['hypervisor'] += 1
         ret_val[datacenter]['threads'] += hv.numCpuThreads
         ret_val[datacenter]['vcpu_reserved'] += hv.vcpuReserved
@@ -375,6 +375,7 @@ def datacenter_info(request):
         ret_val[datacenter]['mem_reserved'] += hv.memoryReserved
         ret_val[datacenter]['storage'] += hv.get_datastores_size()
         ret_val[datacenter]['disk_reserved'] += hv.diskReserved
+        ret_val[datacenter]['raw'] += hv.get_raw_disk_reserved()
         ret_val[datacenter]['guest'] += hv.get_number_guest()
         ret_val[datacenter]['linkspeed'].append(interface_statistics(hv))
         ret_val[datacenter]['esxiversion'].append({str(hv.productVersion): 1})
@@ -390,6 +391,7 @@ def datacenter_info(request):
             'vcpu_reserved': ret_val[dc]['vcpu_reserved'],
             'mem_reserved': ret_val[dc]['mem_reserved'],
             'disk_reserved': ret_val[dc]['disk_reserved'],
+            'raw': ret_val[dc]['raw'],
             'memory': ret_val[dc]['memory'],
             'linkspeed': reduce(lambda x, y: dict((k, v + y[k])
                                                   for k, v in x.iteritems()),
