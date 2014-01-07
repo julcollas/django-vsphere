@@ -408,6 +408,10 @@ def physical_statistics(request):
     data = datacenter_info(request)
     data['esxiversion'] = sum_list_dict([x['esxiversion'] for x in data['data']])
     data['linkspeed'] = sum_list_dict([x['linkspeed'] for x in data['data']])
+    data['is_raw'] = False
+    for x in data['data']:
+        if x.get('raw') > 0:
+            data['is_raw'] = True
 
     return render_to_response('physical.html', data,
                               context_instance=RequestContext(request))
