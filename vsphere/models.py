@@ -66,7 +66,6 @@ class Hypervisor(models.Model):
     def get_raw_disk_reserved(self):
         raw_disk_reserved = 0
         guest_list = Guest.objects.filter(hypervisor=self)
-        print guest_list
         for guest in guest_list:
             try:
                 _temp = Disk.objects.filter(guest=guest, raw=True).aggregate(Sum('size'))
