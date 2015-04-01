@@ -31,3 +31,16 @@ Quick start
 6. Visit http://127.0.0.1:8000/ to display the dashboard.
 
 7. Visit the guest API at http://127.0.0.1:8000/api/guest/?name=vm1
+
+
+Import
+-----------
+
+1. You can find an example script to import an hypervisor in "tools".
+
+2. run import
+
+      $ pip install pysphere
+      $ python import_hypervisor.py -H hv.example.com -u user1 -d DatacenterX -p mypassword
+
+3. The import script can use password stored in ~/.hypervisor.ini
