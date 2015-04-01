@@ -41,6 +41,7 @@ Import
 2. run import
 
       $ pip install pysphere
+      
       $ python import_hypervisor.py -H hv.example.com -u user1 -d DatacenterX -p mypassword
 
 3. The import script can use password stored in ~/.hypervisor.ini
