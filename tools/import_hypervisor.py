@@ -131,7 +131,7 @@ def get_vswitch(server):
     return ret_val
 
 
-def get_guests(server, dhm_vm):
+def get_guests(server):
     """Return a list of dict guest"""
 
     properties = [
@@ -165,16 +165,14 @@ def get_guests(server, dhm_vm):
             osVersion = ''
             annotation = ''
             vnics = []
+            resourcePool = vm.get_resource_pool_name()
         else:
             annotation = vm.properties.config.annotation
             osVersion = vm.get_property('guest_full_name')
             poweredOn = vm.is_powered_on()
             disks = get_disks(vm)
             vnics = get_vnics(vm)
-
-        resourcePool = 'Default'
-        if name in dhm_vm:
-            resourcePool = dhm_vm[name]
+            resourcePool = 'Default'
 
         ret_val.append({'name': name,
                         'vcpu': vcpu,
@@ -354,7 +352,7 @@ def create_vnic(vnic, guest, network):
     return v
 
 
-def create_full_hypervisor(server, datacenter, note, dhm_vm):
+def create_full_hypervisor(server, datacenter, note):
     """Create a full hypervisor with Hardware, interface, network,
     guetst, ..."""
     HARDWARE = get_hardware(server)
@@ -389,7 +387,7 @@ def create_full_hypervisor(server, datacenter, note, dhm_vm):
         else:
             create_interface(interface, hypervisor, n_vswitch)
 
-    GUESTS = get_guests(server, dhm_vm)
+    GUESTS = get_guests(server)
     for guest in GUESTS:
         g = create_guest(guest, hypervisor)
 
