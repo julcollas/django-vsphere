@@ -165,14 +165,14 @@ def get_guests(server):
             osVersion = ''
             annotation = ''
             vnics = []
-            resourcePool = vm.get_resource_pool_name()
+            resourcePool = 'Default'
         else:
             annotation = vm.properties.config.annotation
             osVersion = vm.get_property('guest_full_name')
             poweredOn = vm.is_powered_on()
             disks = get_disks(vm)
             vnics = get_vnics(vm)
-            resourcePool = 'Default'
+            resourcePool = vm.get_resource_pool_name()
 
         ret_val.append({'name': name,
                         'vcpu': vcpu,
