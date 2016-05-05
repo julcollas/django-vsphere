@@ -3,7 +3,7 @@ django-vsphere is an app for `Django <https://www.djangoproject.com/>`_ to have 
 Dependencies
 -----------
 
-- django-tasypie
+- django-tastypie
 - python-mimeparse (un-resolved tastypie dependencie)
 
 Quick start
